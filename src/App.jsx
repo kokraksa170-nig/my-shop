@@ -1,16 +1,16 @@
 import { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 
-import ProtectedRoute from "./routes/ProtectedRoute";
-import Admin from "./pages/Admin";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Home from "./pages/Home";
-import CartPage from "./pages/CartPage";
-import Orders from "./pages/Orders";
-import Header from "./components/Header";
-import Checkout from "./pages/Checkout";
-import { ToastProvider } from "./components/Toast";
+import ProtectedRoute from "./routes/ProtectedRoute.jsx";
+import Admin from "./pages/Admin.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Home from "./pages/Home.jsx";
+import CartPage from "./pages/CartPage.jsx";
+import Orders from "./pages/Orders.jsx";
+import Header from "./components/Header.jsx";
+import Checkout from "./pages/Checkout.jsx";
+import { ToastProvider } from "./components/Toast.jsx";
 import API from "./config";
 import "./styles.css";
 
