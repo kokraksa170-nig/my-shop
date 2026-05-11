@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useToast } from "../components/Toast";
+import API from "../config";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
@@ -11,7 +12,7 @@ export default function Orders() {
   async function fetchOrders() {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/orders", {
+      const res = await fetch(`${API}/orders`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       const data = await res.json();
@@ -41,6 +42,14 @@ export default function Orders() {
                   {item.name} × {item.qty} — ${item.price * item.qty}
                 </div>
               ))}
+            </div>
+            <div style={{ marginTop: "10px" }}>
+              <span style={{
+                background: order.status === "delivered" ? "#2ecc71" : order.status === "shipped" ? "#3498db" : "#e67e22",
+                color: "white", padding: "4px 12px", borderRadius: "99px", fontSize: "13px"
+              }}>
+                {order.status}
+              </span>
             </div>
           </div>
         ))

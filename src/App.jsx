@@ -11,6 +11,7 @@ import Orders from "./pages/Orders";
 import Header from "./components/Header";
 import Checkout from "./pages/Checkout";
 import { ToastProvider } from "./components/Toast";
+import API from "./config";
 import "./styles.css";
 
 export default function App() {
@@ -32,7 +33,7 @@ export default function App() {
 
   useEffect(() => {
     setLoading(true);
-    fetch("http://localhost:5000/products")
+    fetch(`${API}/products`)
       .then(res => res.json())
       .then(data => { setProducts(data); setLoading(false); })
       .catch(() => setLoading(false));

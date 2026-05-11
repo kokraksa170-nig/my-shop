@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
+import API from "../config";
 
 export default function Checkout({ cart, setCart }) {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function Checkout({ cart, setCart }) {
     if (cart.length === 0) { toast("Cart is empty ❌", "error"); return; }
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5000/orders", {
+      const res = await fetch(`${API}/orders`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
         body: JSON.stringify({ items: cart })
