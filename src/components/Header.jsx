@@ -14,7 +14,7 @@ export default function Header({ cartCount = 0 }) {
 
   return (
     <header className="header">
-      <h1>ModernShop Pro</h1>
+      <h1>Tinh ey Tinh tv</h1>
       <nav>
         <Link to="/">Home</Link>
         <Link to="/cart">🛒 Cart {cartCount > 0 && <span className="cart-badge">({cartCount})</span>}</Link>
