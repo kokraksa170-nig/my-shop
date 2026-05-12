@@ -9,8 +9,8 @@ import Home from "./pages/Home.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import Orders from "./pages/Orders.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
+import Payment from "./pages/Payment.jsx";
 import Header from "./components/Header.jsx";
-import Checkout from "./pages/Checkout.jsx";
 import { ToastProvider } from "./components/Toast.jsx";
 import API from "./config.js";
 import "./styles.css";
@@ -77,7 +77,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-          <Route path="/checkout" element={<ProtectedRoute><Checkout cart={cart} setCart={setCart} /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute><Payment cart={cart} setCart={setCart} /></ProtectedRoute>} />
         </Routes>
       </div>
     </ToastProvider>
