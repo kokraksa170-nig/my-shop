@@ -20,7 +20,7 @@ export default function Home({ products, addToCart, loading }) {
   return (
     <div>
       <div className="hero">
-        <h2>Welcome to <span>ModernShop</span></h2>
+        <h2>Welcome to <span>my kak shop</span></h2>
         <p>Discover premium products at unbeatable prices</p>
         <button className="hero-btn" onClick={() => document.querySelector('.filters').scrollIntoView({ behavior: 'smooth' })}>
           Shop Now →
