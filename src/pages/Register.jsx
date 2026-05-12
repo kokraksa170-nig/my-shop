@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import API from "../config";
 
@@ -22,7 +22,7 @@ export default function Register() {
       });
       const data = await res.json();
       if (res.ok) {
-        toast("Registered successfully ✅");
+        toast("Account created successfully ✅");
         navigate("/login");
       } else {
         toast(data.message, "error");
@@ -35,13 +35,17 @@ export default function Register() {
 
   return (
     <div className="auth">
-      <h1>Register</h1>
-      <form onSubmit={handleRegister}>
-        <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} required />
-        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Password (min 6 characters)" value={password} onChange={e => setPassword(e.target.value)} required />
-        <button type="submit" disabled={loading}>{loading ? "Registering..." : "Register"}</button>
-      </form>
+      <div className="auth-card">
+        <h1>Create Account</h1>
+        <p className="auth-subtitle">Join ModernShop today</p>
+        <form onSubmit={handleRegister}>
+          <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} required />
+          <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} required />
+          <input type="password" placeholder="Password (min 6 characters)" value={password} onChange={e => setPassword(e.target.value)} required />
+          <button type="submit" className="auth-btn" disabled={loading}>{loading ? "Creating account..." : "Create Account →"}</button>
+        </form>
+        <p className="auth-link">Already have an account? <Link to="/login">Sign in</Link></p>
+      </div>
     </div>
   );
 }

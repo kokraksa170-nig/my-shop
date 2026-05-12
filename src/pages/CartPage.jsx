@@ -5,24 +5,40 @@ export default function CartPage({ cart, increase, decrease }) {
 
   return (
     <div className="cart">
-      <h2>Your Cart</h2>
-      {cart.length === 0 ? (
-        <p>Your cart is empty 🛒 <Link to="/">Shop now</Link></p>
-      ) : (
-        <>
-          {cart.map(item => (
-            <div key={item._id} className="cart-item">
-              <p>{item.name} — ${item.price} × {item.qty}</p>
-              <div>
-                <button onClick={() => increase(item._id)}>+</button>
-                <button onClick={() => decrease(item._id)}>−</button>
+      <div className="cart-card">
+        <h2>🛒 Your Cart</h2>
+        {cart.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "40px" }}>
+            <p style={{ fontSize: "18px", color: "#999", marginBottom: "20px" }}>Your cart is empty</p>
+            <Link to="/"><button>Continue Shopping →</button></Link>
+          </div>
+        ) : (
+          <>
+            {cart.map(item => (
+              <div key={item._id} className="cart-item">
+                <div className="cart-item-info">
+                  <div className="cart-item-name">{item.name}</div>
+                  <div className="cart-item-price">${(item.price * item.qty).toFixed(2)}</div>
+                </div>
+                <div className="cart-item-controls">
+                  <button className="qty-btn" onClick={() => decrease(item._id)}>−</button>
+                  <span className="qty-num">{item.qty}</span>
+                  <button className="qty-btn" onClick={() => increase(item._id)}>+</button>
+                </div>
               </div>
+            ))}
+            <div className="cart-total">
+              <span className="cart-total-label">Total</span>
+              <span className="cart-total-amount">${total.toFixed(2)}</span>
             </div>
-          ))}
-          <h3>Total: ${total}</h3>
-          <Link to="/checkout"><button>Go to Checkout →</button></Link>
-        </>
-      )}
+            <Link to="/checkout">
+              <button style={{ width: "100%", marginTop: "20px", padding: "14px", background: "#e94560", fontSize: "16px", fontWeight: "700", borderRadius: "12px" }}>
+                Proceed to Checkout →
+              </button>
+            </Link>
+          </>
+        )}
+      </div>
     </div>
   );
 }

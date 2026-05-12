@@ -28,29 +28,31 @@ export default function Orders() {
   return (
     <div className="orders-page">
       <h1>My Orders</h1>
-      {orders.length === 0 ? <p>No orders yet 📦</p> : (
+      {orders.length === 0 ? (
+        <div style={{ textAlign: "center", padding: "60px", color: "#999" }}>
+          <p style={{ fontSize: "18px" }}>No orders yet 📦</p>
+        </div>
+      ) : (
         orders.map(order => (
           <div key={order._id} className="order-card">
             <div className="order-header">
-              <span>Order #{order._id.slice(-6).toUpperCase()}</span>
-              <span>{new Date(order.createdAt).toLocaleDateString()}</span>
-              <span className="order-total">${order.total}</span>
+              <span className="order-id">Order #{order._id.slice(-6).toUpperCase()}</span>
+              <span className="order-date">{new Date(order.createdAt).toLocaleDateString()}</span>
+              <span className="order-total">${order.total.toFixed(2)}</span>
             </div>
-            <div className="order-items">
+            <div style={{ marginBottom: "12px" }}>
               {order.items.map((item, i) => (
                 <div key={i} className="order-item">
-                  {item.name} × {item.qty} — ${item.price * item.qty}
+                  {item.name} × {item.qty} — ${(item.price * item.qty).toFixed(2)}
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: "10px" }}>
-              <span style={{
-                background: order.status === "delivered" ? "#2ecc71" : order.status === "shipped" ? "#3498db" : "#e67e22",
-                color: "white", padding: "4px 12px", borderRadius: "99px", fontSize: "13px"
-              }}>
-                {order.status}
-              </span>
-            </div>
+            <span className={`status-badge status-${order.status}`}>
+              {order.status === "pending" && "⏳ "}
+              {order.status === "shipped" && "🚚 "}
+              {order.status === "delivered" && "✅ "}
+              {order.status}
+            </span>
           </div>
         ))
       )}

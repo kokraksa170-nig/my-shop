@@ -8,10 +8,11 @@ import Register from "./pages/Register.jsx";
 import Home from "./pages/Home.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import Orders from "./pages/Orders.jsx";
+import ProductDetail from "./pages/ProductDetail.jsx";
 import Header from "./components/Header.jsx";
 import Checkout from "./pages/Checkout.jsx";
 import { ToastProvider } from "./components/Toast.jsx";
-import API from "./config";
+import API from "./config.js";
 import "./styles.css";
 
 export default function App() {
@@ -70,6 +71,7 @@ export default function App() {
         <Header cartCount={cart.reduce((sum, i) => sum + i.qty, 0)} />
         <Routes>
           <Route path="/" element={<Home products={products} addToCart={addToCart} loading={loading} />} />
+          <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} />} />
           <Route path="/cart" element={<CartPage cart={cart} increase={increase} decrease={decrease} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

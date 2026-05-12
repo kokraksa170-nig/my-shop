@@ -32,19 +32,24 @@ export default function Checkout({ cart, setCart }) {
 
   return (
     <div className="checkout">
-      <h1>Checkout</h1>
-      {cart.length === 0 ? <p>Your cart is empty 🛒</p> : (
-        <>
-          {cart.map(item => (
-            <div key={item._id} className="cart-item">
-              <span>{item.name}</span>
-              <span>${item.price} × {item.qty}</span>
+      <div className="checkout-card">
+        <h1>Order Summary</h1>
+        {cart.length === 0 ? <p style={{ textAlign: "center", color: "#999" }}>Your cart is empty 🛒</p> : (
+          <>
+            {cart.map(item => (
+              <div key={item._id} className="checkout-item">
+                <span>{item.name} × {item.qty}</span>
+                <span>${(item.price * item.qty).toFixed(2)}</span>
+              </div>
+            ))}
+            <div className="checkout-total">
+              <span>Total</span>
+              <span>${total.toFixed(2)}</span>
             </div>
-          ))}
-          <h2>Total: ${total}</h2>
-          <button onClick={placeOrder}>Place Order</button>
-        </>
-      )}
+            <button className="place-order-btn" onClick={placeOrder}>Place Order ✅</button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
