@@ -5,6 +5,8 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import Admin from "./pages/Admin.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 import Home from "./pages/Home.jsx";
 import CartPage from "./pages/CartPage.jsx";
 import Orders from "./pages/Orders.jsx";
@@ -17,18 +19,12 @@ import API from "./config.js";
 import "./styles.css";
 
 export default function App() {
+
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("darkMode") === "true";
   });
-
-  useEffect(() => {
-    localStorage.setItem("darkMode", darkMode);
-    document.body.setAttribute("data-theme", darkMode ? "dark" : "light");
-  }, [darkMode]);
-
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem("cart");
@@ -39,6 +35,11 @@ export default function App() {
   });
 
   useEffect(() => {
+    localStorage.setItem("darkMode", darkMode);
+    document.body.setAttribute("data-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
+  useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
@@ -46,8 +47,14 @@ export default function App() {
     setLoading(true);
     fetch(`${API}/products`)
       .then(res => res.json())
-      .then(data => { setProducts(data); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then(data => {
+        setProducts(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch(() => {
+        setProducts([]);
+        setLoading(false);
+      });
   }, []);
 
   function addToCart(product) {
@@ -89,6 +96,8 @@ export default function App() {
           <Route path="/cart" element={<CartPage cart={cart} increase={increase} decrease={decrease} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

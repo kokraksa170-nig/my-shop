@@ -42,7 +42,14 @@ export default function Login() {
         <form onSubmit={handleLogin}>
           <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} required />
           <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} required />
-          <button type="submit" className="auth-btn" disabled={loading}>{loading ? "Signing in..." : "Sign In →"}</button>
+          <div style={{ textAlign: "right", marginTop: "-8px" }}>
+            <Link to="/forgot-password" style={{ fontSize: "13px", color: "var(--accent)", textDecoration: "none" }}>
+              Forgot password?
+            </Link>
+          </div>
+          <button type="submit" className="auth-btn" disabled={loading}>
+            {loading ? "Signing in..." : "Sign In →"}
+          </button>
         </form>
         <p className="auth-link">Don't have an account? <Link to="/register">Register</Link></p>
       </div>
