@@ -10,6 +10,7 @@ import CartPage from "./pages/CartPage.jsx";
 import Orders from "./pages/Orders.jsx";
 import ProductDetail from "./pages/ProductDetail.jsx";
 import Payment from "./pages/Payment.jsx";
+import Profile from "./pages/Profile.jsx";
 import Header from "./components/Header.jsx";
 import { ToastProvider } from "./components/Toast.jsx";
 import API from "./config.js";
@@ -18,6 +19,15 @@ import "./styles.css";
 export default function App() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem("darkMode") === "true";
+  });
+
+  useEffect(() => {
+    localStorage.setItem("darkMode", darkMode);
+    document.body.setAttribute("data-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   const [cart, setCart] = useState(() => {
     try {
@@ -68,15 +78,20 @@ export default function App() {
   return (
     <ToastProvider>
       <div>
-        <Header cartCount={cart.reduce((sum, i) => sum + i.qty, 0)} />
+        <Header
+          cartCount={cart.reduce((sum, i) => sum + i.qty, 0)}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+        />
         <Routes>
           <Route path="/" element={<Home products={products} addToCart={addToCart} loading={loading} />} />
-          <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} />} />
+          <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} products={products} />} />
           <Route path="/cart" element={<CartPage cart={cart} increase={increase} decrease={decrease} />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/checkout" element={<ProtectedRoute><Payment cart={cart} setCart={setCart} /></ProtectedRoute>} />
         </Routes>
       </div>

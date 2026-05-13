@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useToast } from "../components/Toast";
 import API from "../config";
 
@@ -16,7 +16,7 @@ function StarRating({ value, onChange, readonly = false }) {
           style={{
             fontSize: readonly ? "18px" : "28px",
             cursor: readonly ? "default" : "pointer",
-            color: star <= (hover || value) ? "#f59e0b" : "#d1d5db",
+            color: star <= (hover || value) ? "#f59e0b" : "var(--border)",
             transition: "color 0.1s"
           }}
         >★</span>
@@ -25,8 +25,9 @@ function StarRating({ value, onChange, readonly = false }) {
   );
 }
 
-export default function ProductDetail({ addToCart }) {
+export default function ProductDetail({ addToCart, products = [] }) {
   const { id } = useParams();
+  const navigate = useNavigate();
   const toast = useToast();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -38,9 +39,11 @@ export default function ProductDetail({ addToCart }) {
 
   useEffect(() => {
     fetchProduct();
+    window.scrollTo(0, 0);
   }, [id]);
 
   async function fetchProduct() {
+    setLoading(true);
     const res = await fetch(`${API}/products/${id}`);
     const data = await res.json();
     setProduct(data);
@@ -61,8 +64,7 @@ export default function ProductDetail({ addToCart }) {
       const data = await res.json();
       if (res.ok) {
         toast("Rating submitted ✅");
-        setStars(0);
-        setComment("");
+        setStars(0); setComment("");
         fetchProduct();
       } else {
         toast(data.message, "error");
@@ -80,6 +82,9 @@ export default function ProductDetail({ addToCart }) {
   const isLowStock = product.stock > 0 && product.stock <= 5;
   const avgRating = product.avgRating || 0;
 
+  // ✅ Related products — same category, exclude current
+  const related = products.filter(p => p.category === product.category && p._id !== product._id).slice(0, 4);
+
   function handleAddToCart() {
     addToCart(product);
     toast(`${product.name} added to cart 🛒`);
@@ -96,10 +101,9 @@ export default function ProductDetail({ addToCart }) {
           <span className="category-tag">{product.category || "General"}</span>
           <h1>{product.name}</h1>
 
-          {/* AVERAGE RATING */}
           <div style={{ display: "flex", alignItems: "center", gap: "8px", margin: "8px 0" }}>
             <StarRating value={Math.round(avgRating)} readonly />
-            <span style={{ color: "#999", fontSize: "14px" }}>
+            <span style={{ color: "var(--text-secondary)", fontSize: "14px" }}>
               {avgRating.toFixed(1)} ({product.ratings?.length || 0} reviews)
             </span>
           </div>
@@ -116,53 +120,85 @@ export default function ProductDetail({ addToCart }) {
             {!isOutOfStock && !isLowStock && <span className="stock-badge in-stock">✅ In Stock ({product.stock} available)</span>}
           </div>
 
-          <button
-            className="add-to-cart-btn"
-            disabled={isOutOfStock}
-            onClick={handleAddToCart}
-            style={{ fontSize: "16px", padding: "14px" }}
-          >
+          <button className="add-to-cart-btn" disabled={isOutOfStock} onClick={handleAddToCart} style={{ fontSize: "16px", padding: "14px" }}>
             {isOutOfStock ? "Out of Stock" : "Add to Cart 🛒"}
           </button>
         </div>
       </div>
 
-      {/* REVIEWS SECTION */}
-      <div style={{ marginTop: "40px", background: "white", borderRadius: "12px", padding: "30px", boxShadow: "0 4px 20px rgba(0,0,0,0.08)" }}>
-        <h2 style={{ color: "#1a1a2e", marginBottom: "24px" }}>Customer Reviews</h2>
+      {/* ✅ RELATED PRODUCTS */}
+      {related.length > 0 && (
+        <div style={{ marginTop: "40px" }}>
+          <h2 style={{ color: "var(--text-primary)", marginBottom: "20px", fontSize: "22px", fontWeight: "700" }}>
+            Related Products
+          </h2>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "20px" }}>
+            {related.map(p => (
+              <div
+                key={p._id}
+                className="card"
+                onClick={() => navigate(`/product/${p._id}`)}
+              >
+                <div className="card-img-wrap" style={{ height: "160px" }}>
+                  <img src={p.image} alt={p.name} />
+                </div>
+                <div className="card-body">
+                  <h3 style={{ fontSize: "14px" }}>{p.name}</h3>
+                  <div className="card-footer">
+                    <span className="price" style={{ fontSize: "16px" }}>${p.price}</span>
+                    <span className={`stock-badge ${p.stock === 0 ? "out-of-stock" : "in-stock"}`}>
+                      {p.stock === 0 ? "Out" : "In Stock"}
+                    </span>
+                  </div>
+                  <button
+                    className="add-to-cart-btn"
+                    disabled={p.stock === 0}
+                    onClick={e => { e.stopPropagation(); addToCart(p); toast(`${p.name} added to cart 🛒`); }}
+                    style={{ fontSize: "13px", padding: "8px" }}
+                  >
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {/* SUBMIT RATING */}
+      {/* REVIEWS */}
+      <div style={{ marginTop: "40px", background: "var(--bg-card)", borderRadius: "12px", padding: "30px", boxShadow: "var(--card-shadow)" }}>
+        <h2 style={{ color: "var(--text-primary)", marginBottom: "24px" }}>Customer Reviews</h2>
+
         {isLoggedIn ? (
-          <form onSubmit={submitRating} style={{ marginBottom: "32px", padding: "20px", background: "#f8f9fa", borderRadius: "10px" }}>
-            <h3 style={{ marginBottom: "12px", fontSize: "16px" }}>Write a Review</h3>
+          <form onSubmit={submitRating} style={{ marginBottom: "32px", padding: "20px", background: "var(--bg)", borderRadius: "10px" }}>
+            <h3 style={{ marginBottom: "12px", fontSize: "16px", color: "var(--text-primary)" }}>Write a Review</h3>
             <StarRating value={stars} onChange={setStars} />
             <textarea
               placeholder="Share your experience (optional)..."
               value={comment}
               onChange={e => setComment(e.target.value)}
-              style={{ width: "100%", marginTop: "12px", padding: "10px", borderRadius: "8px", border: "2px solid #e0e0e0", fontSize: "14px", minHeight: "80px", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
+              style={{ width: "100%", marginTop: "12px", padding: "10px", borderRadius: "8px", border: "2px solid var(--border)", fontSize: "14px", minHeight: "80px", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box", background: "var(--input-bg)", color: "var(--text-primary)" }}
             />
-            <button type="submit" disabled={submitting} style={{ marginTop: "12px", padding: "10px 24px", background: "#e94560", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>
+            <button type="submit" disabled={submitting} style={{ marginTop: "12px", padding: "10px 24px", background: "var(--accent)", color: "white", border: "none", borderRadius: "8px", fontWeight: "600", cursor: "pointer" }}>
               {submitting ? "Submitting..." : "Submit Review"}
             </button>
           </form>
         ) : (
-          <p style={{ marginBottom: "24px", color: "#999", fontSize: "14px" }}>
-            <Link to="/login" style={{ color: "#e94560" }}>Login</Link> to leave a review
+          <p style={{ marginBottom: "24px", color: "var(--text-secondary)", fontSize: "14px" }}>
+            <Link to="/login" style={{ color: "var(--accent)" }}>Login</Link> to leave a review
           </p>
         )}
 
-        {/* REVIEWS LIST */}
         {product.ratings?.length === 0 ? (
-          <p style={{ color: "#999", textAlign: "center", padding: "20px" }}>No reviews yet — be the first!</p>
+          <p style={{ color: "var(--text-secondary)", textAlign: "center", padding: "20px" }}>No reviews yet — be the first!</p>
         ) : (
           product.ratings?.map((r, i) => (
-            <div key={i} style={{ padding: "16px 0", borderBottom: "1px solid #f0f0f0" }}>
+            <div key={i} style={{ padding: "16px 0", borderBottom: "1px solid var(--border)" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
                 <StarRating value={r.stars} readonly />
-                <span style={{ fontSize: "13px", color: "#999" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
+                <span style={{ fontSize: "13px", color: "var(--text-secondary)" }}>{new Date(r.createdAt).toLocaleDateString()}</span>
               </div>
-              {r.comment && <p style={{ fontSize: "14px", color: "#555" }}>{r.comment}</p>}
+              {r.comment && <p style={{ fontSize: "14px", color: "var(--text-secondary)" }}>{r.comment}</p>}
             </div>
           ))
         )}
