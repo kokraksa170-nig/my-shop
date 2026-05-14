@@ -15,24 +15,49 @@ import Payment from "./pages/Payment.jsx";
 import Profile from "./pages/Profile.jsx";
 import Header from "./components/Header.jsx";
 import { ToastProvider } from "./components/Toast.jsx";
+import { LangProvider } from "./components/LangContext.jsx";
 import API from "./config.js";
 import "./styles.css";
+
+// ✅ Register service worker for PWA
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js")
+      .then(() => console.log("SW registered ✅"))
+      .catch(err => console.log("SW error:", err));
+  });
+}
 
 export default function App() {
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [darkMode, setDarkMode] = useState(() => {
-    return localStorage.getItem("darkMode") === "true";
-  });
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem("darkMode") === "true");
   const [cart, setCart] = useState(() => {
     try {
       const saved = localStorage.getItem("cart");
       return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
+    } catch { return []; }
   });
+
+  // ✅ PWA install prompt
+  const [installPrompt, setInstallPrompt] = useState(null);
+  const [showInstall, setShowInstall] = useState(false);
+
+  useEffect(() => {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setShowInstall(true);
+    });
+  }, []);
+
+  async function handleInstall() {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") setShowInstall(false);
+  }
 
   useEffect(() => {
     localStorage.setItem("darkMode", darkMode);
@@ -47,63 +72,71 @@ export default function App() {
     setLoading(true);
     fetch(`${API}/products`)
       .then(res => res.json())
-      .then(data => {
-        setProducts(Array.isArray(data) ? data : []);
-        setLoading(false);
-      })
-      .catch(() => {
-        setProducts([]);
-        setLoading(false);
-      });
+      .then(data => { setProducts(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => { setProducts([]); setLoading(false); });
   }, []);
 
   function addToCart(product) {
     const exist = cart.find(item => item._id === product._id);
     if (exist) {
-      setCart(cart.map(item =>
-        item._id === product._id ? { ...item, qty: item.qty + 1 } : item
-      ));
+      setCart(cart.map(item => item._id === product._id ? { ...item, qty: item.qty + 1 } : item));
     } else {
       setCart([...cart, { ...product, qty: 1 }]);
     }
   }
 
   function increase(id) {
-    setCart(cart.map(item =>
-      item._id === id ? { ...item, qty: item.qty + 1 } : item
-    ));
+    setCart(cart.map(item => item._id === id ? { ...item, qty: item.qty + 1 } : item));
   }
 
   function decrease(id) {
-    setCart(
-      cart.map(item =>
-        item._id === id ? { ...item, qty: item.qty - 1 } : item
-      ).filter(item => item.qty > 0)
-    );
+    setCart(cart.map(item => item._id === id ? { ...item, qty: item.qty - 1 } : item).filter(item => item.qty > 0));
   }
 
   return (
-    <ToastProvider>
-      <div>
-        <Header
-          cartCount={cart.reduce((sum, i) => sum + i.qty, 0)}
-          darkMode={darkMode}
-          setDarkMode={setDarkMode}
-        />
-        <Routes>
-          <Route path="/" element={<Home products={products} addToCart={addToCart} loading={loading} />} />
-          <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} products={products} />} />
-          <Route path="/cart" element={<CartPage cart={cart} increase={increase} decrease={decrease} />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
-          <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/checkout" element={<ProtectedRoute><Payment cart={cart} setCart={setCart} /></ProtectedRoute>} />
-        </Routes>
-      </div>
-    </ToastProvider>
+    <LangProvider>
+      <ToastProvider>
+        <div>
+          <Header
+            cartCount={cart.reduce((sum, i) => sum + i.qty, 0)}
+            darkMode={darkMode}
+            setDarkMode={setDarkMode}
+          />
+
+          {/* ✅ PWA Install Banner */}
+          {showInstall && (
+            <div style={{
+              background: "#1a1a2e", color: "white", padding: "12px 24px",
+              display: "flex", justifyContent: "space-between", alignItems: "center",
+              fontSize: "14px"
+            }}>
+              <span>📱 Install ModernShop on your phone for a better experience!</span>
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button onClick={handleInstall} style={{ background: "#e94560", padding: "8px 16px", borderRadius: "8px", margin: 0, fontSize: "13px" }}>
+                  Install App
+                </button>
+                <button onClick={() => setShowInstall(false)} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.3)", padding: "8px 16px", borderRadius: "8px", margin: 0, fontSize: "13px" }}>
+                  Later
+                </button>
+              </div>
+            </div>
+          )}
+
+          <Routes>
+            <Route path="/" element={<Home products={products} addToCart={addToCart} loading={loading} />} />
+            <Route path="/product/:id" element={<ProductDetail addToCart={addToCart} products={products} />} />
+            <Route path="/cart" element={<CartPage cart={cart} increase={increase} decrease={decrease} />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/admin" element={<ProtectedRoute adminOnly><Admin /></ProtectedRoute>} />
+            <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/checkout" element={<ProtectedRoute><Payment cart={cart} setCart={setCart} /></ProtectedRoute>} />
+          </Routes>
+        </div>
+      </ToastProvider>
+    </LangProvider>
   );
 }
